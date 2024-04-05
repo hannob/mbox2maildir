@@ -1,0 +1,29 @@
+#!/usr/bin/python3
+
+import argparse
+import mailbox
+import os
+import sys
+
+ap = argparse.ArgumentParser()
+ap.add_argument("input")
+ap.add_argument("output")
+ap.add_argument("-a", "--add", action="store_true")
+ap.add_argument("-r", "--reverse", action="store_true")
+args = ap.parse_args()
+
+if not args.add and os.path.exists(args.output):
+    print(f"ERROR: {args.output} already exists.")
+    print("You can use -a/--add if you want to add mails to")
+    print("an existing maildir.")
+    sys.exit(1)
+
+if not args.reverse:
+    inp = mailbox.mbox(args.input, create=False)
+    out = mailbox.Maildir(args.output, create=True)
+else:
+    inp = mailbox.Maildir(args.input, create=False)
+    out = mailbox.mbox(args.output, create=True)
+
+for m in inp.iteritems():
+    out.add(m[1])
